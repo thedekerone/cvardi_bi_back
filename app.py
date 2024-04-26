@@ -33,6 +33,7 @@ def create_user():
     # Replace this with logic to store user data
     # (e.g., database insert, file system storage)
     users[data["id"]] = data
+    # tests
     return jsonify({"success": True})
 
 if __name__ == "__main__":
