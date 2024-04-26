@@ -15,7 +15,7 @@ def get_images():
     if not user_id:
         return jsonify({"error": "Missing userId parameter"}), 400
     # Assuming image path is always "good-selfie.jpg" for this user
-    image_path = "good-selfie.jpg"
+    image_path = "good-selfie-.jpg"
     # Build the image URL relative to the root of the application
     # This assumes your static folder is configured correctly in Flask
     image_url = f"https://cvardi-bi-back.onrender.com/static/{image_path}"
