@@ -14,10 +14,12 @@ def get_images():
     user_id = request.args.get("userId")
     if not user_id:
         return jsonify({"error": "Missing userId parameter"}), 400
-    # Replace this with logic to retrieve images based on user_id
-    # (e.g., database lookup, file system access)
-    images = []  # Replace with actual image data
-    return jsonify({"images": images})
+    # Assuming image path is always "good-selfie.jpg" for this user
+    image_path = "good-selfie.jpg"
+    # Build the image URL relative to the root of the application
+    # This assumes your static folder is configured correctly in Flask
+    image_url = f"static/{image_path}"
+    return jsonify({"imageUrl": image_url})
 
 @app.route("/user", methods=["POST"])
 def create_user():
@@ -34,5 +36,7 @@ def create_user():
     return jsonify({"success": True})
 
 if __name__ == "__main__":
+    # Configure the static folder location (adjust as needed)
+    app.config['STATIC_FOLDER'] = 'static'
     app.run(debug=True)
 
