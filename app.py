@@ -1,4 +1,8 @@
+import csv
+import os
 from flask import Flask, request, jsonify
+from helpers import append_user_to_csv
+from helpers import save_image_to_folder
 
 app = Flask(__name__)
 
@@ -7,37 +11,54 @@ users = {}
 
 @app.route("/")
 def hello_world():
-    return "Hello, World 🤠!"
+    return "Hello, World🙌!"
+
 
 @app.route("/images", methods=["GET"])
 def get_images():
     user_id = request.args.get("userId")
     if not user_id:
-        return jsonify({"error": "Missing userId parameter"}), 400
-    # Assuming image path is always "good-selfie.jpg" for this user
-    image_path = "good-selfie-.jpg"
-    # Build the image URL relative to the root of the application
-    # This assumes your static folder is configured correctly in Flask
-    image_url = f"https://cvardi-bi-back.onrender.com/static/{image_path}"
-    return jsonify({"imageUrl": image_url})
+        return jsonify({"error": "Missing userId parameter"}), 400    
+    directory = 'static/editedImages/'    
+    files = os.listdir(directory)
+    filtered_files = [file for file in files if user_id in file]      
+    image_urls = [f"https://cvardi-bi-back.onrender.com/{directory}{file}" for file in filtered_files]    
+    return jsonify({"imageUrls": image_urls})
 
-@app.route("/user", methods=["POST"])
+
+@app.route('/user', methods=['POST'])
 def create_user():
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Missing data in request body"}), 400
-    required_fields = {"image", "id", "username"}
+    if 'image' not in request.files:
+        return jsonify({"error": "No image provided"}), 400
+    image = request.files['image']
+    if image.filename == '':
+        return jsonify({"error": "No image selected"}), 400
+    data = request.form.to_dict()
+    required_fields = {"id"}
     missing_fields = required_fields - set(data.keys())
     if missing_fields:
         return jsonify({"error": f"Missing fields: {', '.join(missing_fields)}"}), 400
-    # Replace this with logic to store user data
-    # (e.g., database insert, file system storage)
-    users[data["id"]] = data
-    # tests
+    image_path, error = save_image_to_folder(image, f"{data['id']}.png")
+    if error:
+        return jsonify({"error": error}), 500
+    return jsonify({"success": True, "image_path": image_path})
+
+@app.route('/stream', methods=['POST'])
+def check_gesture():
+    if 'image' not in request.files:
+        return jsonify({"error": "No image provided"}), 400
+    image = request.files['image']
+    if image.filename == '':
+        return jsonify({"error": "No image selected"}), 400
+    
+    have_gesture = True # implement gesture recognition here
+    if have_gesture:
+            label_images()
+
     return jsonify({"success": True})
 
+
 if __name__ == "__main__":
-    # Configure the static folder location (adjust as needed)
     app.config['STATIC_FOLDER'] = 'static'
     app.run(debug=True)
 
